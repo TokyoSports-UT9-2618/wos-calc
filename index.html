@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ホワサバ集結計算機</title>
+    <title>ホワサバ集結計算機 Ver1.7</title>
     <style>
         /* --- デザイン設定 (CSS) --- */
         :root {
@@ -162,3 +162,236 @@
     <button class="add-btn" onclick="addLeaderRow()">＋ リーダー追加</button>
 
     <br><br>
+
+    <div class="card">
+        <div style="margin-bottom:10px; font-weight:bold; font-size:14px; color:#555;">集結時間</div>
+        <div class="rally-options">
+            <button class="rally-btn active" onclick="selectRally(1, this)">1分集結</button>
+            <button class="rally-btn" onclick="selectRally(5, this)">5分集結</button>
+            <button class="rally-btn" onclick="selectRally(10, this)">10分集結</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:bold; margin-bottom:5px;">① 着弾時間から計算</div>
+        <div class="calc-area">
+            <input type="text" id="targetTime" placeholder="例 18:45:00" style="text-align:center; font-size:18px;">
+            <button class="action-btn" onclick="calcFromTarget()">計算＆コピー</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:bold; margin-bottom:10px;">② ○秒後スタートで計算</div>
+        <div class="delay-options">
+            <button class="delay-btn" onclick="calcFromDelay(30)">30秒後</button>
+            <button class="delay-btn" onclick="calcFromDelay(60)">60秒後</button>
+            <button class="delay-btn" onclick="calcFromDelay(90)">90秒後</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="copy-hint">タップしてコピー</div>
+        <div id="result-box" onclick="copyResult()">計算結果がここに表示されます</div>
+    </div>
+</div>
+
+<div id="toast">コピーしました！</div>
+
+<script>
+    // --- データ管理 ---
+    let leaders = [];
+    let selectedRallyMin = 1;
+
+    // 起動時の処理
+    window.onload = function() {
+        loadLeaders();
+        renderLeaders();
+    };
+
+    // --- リーダー操作 ---
+    function loadLeaders() {
+        const saved = localStorage.getItem('wos_leaders');
+        if (saved) {
+            try {
+                leaders = JSON.parse(saved);
+            } catch (e) {
+                leaders = [];
+            }
+        }
+        
+        // ★修正済み：データがない、または空の場合は強制的に5行作る
+        if (!leaders || leaders.length === 0) {
+            leaders = [];
+            for (let i = 0; i < 5; i++) {
+                leaders.push({name: "", sec: ""});
+            }
+        }
+    }
+
+    function saveLeaders() {
+        // 現在のDOMから値を取得して配列とストレージを更新
+        const rows = document.querySelectorAll('.leader-row');
+        leaders = [];
+        rows.forEach(row => {
+            const name = row.querySelector('.name-input').value;
+            const sec = row.querySelector('.sec-input').value;
+            leaders.push({name: name, sec: sec});
+        });
+        localStorage.setItem('wos_leaders', JSON.stringify(leaders));
+    }
+
+    function renderLeaders() {
+        const container = document.getElementById('leaders-container');
+        container.innerHTML = '';
+        leaders.forEach((leader, index) => {
+            const div = document.createElement('div');
+            div.className = 'leader-row';
+            div.innerHTML = `
+                <input type="text" class="name-input" placeholder="リーダー名" value="${leader.name}" oninput="saveLeaders()">
+                <div class="unit">距離</div>
+                <input type="tel" class="sec-input" placeholder="秒" value="${leader.sec}" oninput="saveLeaders()">
+                <div class="unit">秒</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function addLeaderRow() {
+        // ★修正済み：追加前に保存することでデータ消失を防ぐ
+        saveLeaders();
+        leaders.push({name: "", sec: ""});
+        localStorage.setItem('wos_leaders', JSON.stringify(leaders));
+        renderLeaders();
+    }
+
+    // --- 集結時間選択 ---
+    function selectRally(min, btn) {
+        selectedRallyMin = min;
+        document.querySelectorAll('.rally-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    // --- 計算ロジック共通 ---
+    function getActiveLeaders() {
+        return leaders.filter(l => l.name.trim() !== "" && l.sec !== "");
+    }
+
+    function formatName(name) {
+        const trimmed = name.trim();
+        return trimmed.length > 3 ? trimmed.substring(0, 3) : trimmed;
+    }
+
+    function formatTime(date) {
+        const m = date.getMinutes().toString().padStart(2, '0');
+        const s = date.getSeconds().toString().padStart(2, '0');
+        // 要望通りの「mm分ss秒」形式
+        return `${m}分${s}秒`;
+    }
+    
+    function formatLandingTime(date) {
+         const h = date.getHours().toString().padStart(2, '0');
+         const m = date.getMinutes().toString().padStart(2, '0');
+         const s = date.getSeconds().toString().padStart(2, '0');
+         return `${h}:${m}:${s}`;
+    }
+
+    function showResult(text) {
+        document.getElementById('result-box').innerText = text;
+        copyResult();
+    }
+
+    // --- 計算1：着弾時間指定 ---
+    function calcFromTarget() {
+        saveLeaders(); 
+        const inputStr = document.getElementById('targetTime').value;
+        const targetDate = parseTimeInput(inputStr);
+
+        if (!targetDate) {
+            alert("時間は HH:mm:ss 形式で入力してください\n例：18:45:00");
+            return;
+        }
+
+        const active = getActiveLeaders();
+        if (active.length === 0) {
+            alert("リーダー名と秒数を入力してください");
+            return;
+        }
+
+        const rallySec = selectedRallyMin * 60;
+        let output = `${selectedRallyMin}分集結\n`;
+
+        active.forEach(l => {
+            const dist = parseInt(l.sec);
+            const startTimestamp = targetDate.getTime() - (dist * 1000) - (rallySec * 1000);
+            const startDate = new Date(startTimestamp);
+            
+            output += `${formatName(l.name)}（${l.sec}秒）　${formatTime(startDate)}\n`;
+        });
+
+        output += `\n着弾時間 ${formatLandingTime(targetDate)}\n着弾時間に合わせて派兵してください`;
+        showResult(output);
+    }
+
+    function parseTimeInput(str) {
+        const parts = str.split(/[:：]/).map(Number);
+        if (parts.length < 2 || parts.some(isNaN)) return null;
+
+        const now = new Date();
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        
+        if (parts.length === 3) {
+            d.setHours(parts[0], parts[1], parts[2]);
+        } else if (parts.length === 2) {
+            d.setHours(parts[0], parts[1], 0);
+        }
+        return d;
+    }
+
+    // --- 計算2：遅延スタート ---
+    function calcFromDelay(delaySec) {
+        saveLeaders();
+        const active = getActiveLeaders();
+        if (active.length === 0) {
+            alert("リーダー名と秒数を入力してください");
+            return;
+        }
+
+        const distances = active.map(l => parseInt(l.sec));
+        const minDist = Math.min(...distances);
+
+        const now = new Date();
+        const baseStartTime = new Date(now.getTime() + delaySec * 1000);
+        const rallySec = selectedRallyMin * 60;
+        const landingTime = new Date(baseStartTime.getTime() + (rallySec * 1000) + (minDist * 1000));
+
+        let output = `${selectedRallyMin}分集結\n`;
+
+        active.forEach(l => {
+            const dist = parseInt(l.sec);
+            const diff = dist - minDist;
+            const myStart = new Date(baseStartTime.getTime() - (diff * 1000));
+            
+            output += `${formatName(l.name)}（${l.sec}秒）　${formatTime(myStart)}\n`;
+        });
+
+        output += `\n着弾時間 ${formatLandingTime(landingTime)}\n着弾時間に合わせて派兵してください`;
+        showResult(output);
+    }
+
+    // --- クリップボードコピー ---
+    function copyResult() {
+        const text = document.getElementById('result-box').innerText;
+        if (!text || text === "計算結果がここに表示されます") return;
+
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }).catch(err => {
+            alert("コピーに失敗しました。手動でコピーしてください。");
+        });
+    }
+</script>
+
+</body>
+</html>
