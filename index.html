@@ -182,6 +182,28 @@
             bottom: 50px;
         }
 
+        /* 言語切り替えボタン */
+        .lang-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #007AFF;
+            font-weight: bold;
+        }
+
+        /* 言語切り替えボタン */
+        .lang-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #007AFF;
+            font-weight: bold;
+        }
+
         /* カスタムメッセージ入力 */
         textarea {
             width: 100%;
@@ -199,62 +221,112 @@
 
 <body>
 
-    <div class="container">
-        <h1>集結時間計算機</h1>
+    <div class="container" style="position:relative;">
+        <div class="lang-switch" onclick="toggleLang()">[JP] / [EN]</div>
+        <h1 data-i18n="title">集結時間計算機</h1>
 
         <div class="card" id="leaders-container">
         </div>
-        <button class="add-btn" onclick="addLeaderRow()">＋ リーダー追加</button>
+        <button class="add-btn" onclick="addLeaderRow()" data-i18n="addReader">＋ リーダー追加</button>
 
         <br><br>
 
         <div class="card">
-            <div style="margin-bottom:10px; font-weight:bold; font-size:14px; color:#555;">集結時間</div>
+            <div style="margin-bottom:10px; font-weight:bold; font-size:14px; color:#555;" data-i18n="rallyTime">集結時間
+            </div>
             <div class="rally-options">
-                <button class="rally-btn active" onclick="selectRally(1, this)">1分集結</button>
-                <button class="rally-btn" onclick="selectRally(5, this)">5分集結</button>
-                <button class="rally-btn" onclick="selectRally(10, this)">10分集結</button>
+                <button class="rally-btn active" onclick="selectRally(1, this)" data-i18n="rally1m">1分集結</button>
+                <button class="rally-btn" onclick="selectRally(5, this)" data-i18n="rally5m">5分集結</button>
+                <button class="rally-btn" onclick="selectRally(10, this)" data-i18n="rally10m">10分集結</button>
             </div>
         </div>
 
         <div class="card">
-            <div style="font-weight:bold; margin-bottom:5px;">① 着弾時間から計算</div>
+            <div style="font-weight:bold; margin-bottom:5px;" data-i18n="calcFromTarget">① 着弾時間から計算</div>
             <div class="calc-area">
                 <input type="text" id="targetTime" placeholder="例 18:45:00" style="text-align:center; font-size:18px;">
-                <button class="action-btn" onclick="calcFromTarget()">計算＆コピー</button>
+                <button class="action-btn" onclick="calcFromTarget()" data-i18n="calcAndCopy">計算＆コピー</button>
             </div>
         </div>
 
         <div class="card">
-            <div style="font-weight:bold; margin-bottom:10px;">② ○秒後スタートで計算</div>
+            <div style="font-weight:bold; margin-bottom:10px;" data-i18n="calcFromDelay">② ○秒後スタートで計算</div>
             <div class="delay-options">
-                <button class="delay-btn" onclick="calcFromDelay(30)">30秒後</button>
-                <button class="delay-btn" onclick="calcFromDelay(60)">60秒後</button>
-                <button class="delay-btn" onclick="calcFromDelay(90)">90秒後</button>
+                <button class="delay-btn" onclick="calcFromDelay(30)" data-i18n="delay30s">30秒後</button>
+                <button class="delay-btn" onclick="calcFromDelay(60)" data-i18n="delay60s">60秒後</button>
+                <button class="delay-btn" onclick="calcFromDelay(90)" data-i18n="delay90s">90秒後</button>
             </div>
         </div>
 
         <div class="card">
-            <div style="font-weight:bold; margin-bottom:5px;">カスタムメッセージ（任意）</div>
+            <div style="font-weight:bold; margin-bottom:5px;" data-i18n="customMsgLabel">カスタムメッセージ（任意）</div>
             <textarea id="customMessage" placeholder="追加メッセージ（任意・最大100文字）" maxlength="100" rows="3"
                 oninput="saveCustomMessage()"></textarea>
         </div>
 
         <div class="card">
-            <div class="copy-hint">タップしてコピー</div>
-            <div id="result-box" onclick="copyResult()">計算結果がここに表示されます</div>
+            <div class="copy-hint" data-i18n="tapToCopy">タップしてコピー</div>
+            <div id="result-box" onclick="copyResult()" data-i18n="resultPlaceholder">計算結果がここに表示されます</div>
         </div>
     </div>
 
-    <div id="toast">コピーしました！</div>
+    <div id="toast" data-i18n="toastCopy">コピーしました！</div>
 
     <script>
         // --- データ管理 ---
         let leaders = [];
         let selectedRallyMin = 1;
+        let currentLang = 'ja'; // デフォルト
+
+        const translations = {
+            ja: {
+                title: "集結時間計算機",
+                addReader: "＋ リーダー追加",
+                rallyTime: "集結時間",
+                rally1m: "1分集結",
+                rally5m: "5分集結",
+                rally10m: "10分集結",
+                calcFromTarget: "① 着弾時間から計算",
+                calcAndCopy: "計算＆コピー",
+                calcFromDelay: "② ○秒後スタートで計算",
+                delay30s: "30秒後",
+                delay60s: "60秒後",
+                delay90s: "90秒後",
+                customMsgLabel: "カスタムメッセージ（任意）",
+                tapToCopy: "タップしてコピー",
+                resultPlaceholder: "計算結果がここに表示されます",
+                toastCopy: "コピーしました！",
+                leaderNamePlaceholder: "リーダー名",
+                timeRemaining: "残り時間",
+                secUnit: "秒"
+            },
+            en: {
+                title: "Larry Time Calculator",
+                addReader: "+ Add Leader",
+                rallyTime: "Rally Time",
+                rally1m: "1m Rally",
+                rally5m: "5m Rally",
+                rally10m: "10m Rally",
+                calcFromTarget: "① Calc from Landing Time",
+                calcAndCopy: "Calculate & Copy",
+                calcFromDelay: "② Calc from Delay Start",
+                delay30s: "30s After",
+                delay60s: "60s After",
+                delay90s: "90s After",
+                customMsgLabel: "Custom Message",
+                tapToCopy: "Tap to Copy",
+                resultPlaceholder: "Calculation result will be shown here",
+                toastCopy: "Copied to clipboard! (",
+                leaderNamePlaceholder: "Leader Name",
+                timeRemaining: "Time Remaining",
+                secUnit: "sec"
+            }
+        };
 
         // 起動時の処理
+        // 起動時の処理
         window.onload = function () {
+            initLanguage();
             loadLeaders();
             renderLeaders();
             loadCustomMessage(); // カスタムメッセージ復元
@@ -299,13 +371,62 @@
                 const div = document.createElement('div');
                 div.className = 'leader-row';
                 div.innerHTML = `
-                <input type="text" class="name-input" placeholder="リーダー名" value="${leader.name}" oninput="saveLeaders()">
-                <div class="unit">距離</div>
-                <input type="tel" class="sec-input" placeholder="秒" value="${leader.sec}" oninput="saveLeaders()">
-                <div class="unit">秒</div>
+                <input type="text" class="name-input" placeholder="${t('leaderNamePlaceholder')}" value="${leader.name}" oninput="saveLeaders()">
+                <div class="unit">${t('timeRemaining')}</div>
+                <input type="tel" class="sec-input" placeholder="${t('secUnit')}" value="${leader.sec}" oninput="saveLeaders()">
+                <div class="unit">${t('secUnit')}</div>
             `;
                 container.appendChild(div);
             });
+        }
+
+        // --- 言語設定・切り替え ---
+        function initLanguage() {
+            const savedLang = localStorage.getItem('wos_lang');
+            if (savedLang) {
+                currentLang = savedLang;
+            } else {
+                // ブラウザの言語設定を確認
+                const browserLang = navigator.language || navigator.userLanguage;
+                if (browserLang.startsWith('en')) {
+                    currentLang = 'en';
+                } else {
+                    currentLang = 'ja';
+                }
+            }
+            updateLanguageUI();
+        }
+
+        function toggleLang() {
+            currentLang = (currentLang === 'ja') ? 'en' : 'ja';
+            localStorage.setItem('wos_lang', currentLang);
+            updateLanguageUI();
+            renderLeaders(); // リーダー入力欄のプレースホルダー更新のため再描画
+        }
+
+        function updateLanguageUI() {
+            // data-i18n 属性を持つ要素を一括更新
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerText = translations[currentLang][key];
+                }
+            });
+
+            // プレースホルダーの更新 (TargetTime, CustomMessage)
+            // ※TargetTime は固有なのでここで変更
+            const targetTimeInput = document.getElementById('targetTime');
+            if (currentLang === 'en') {
+                targetTimeInput.placeholder = "Ex. 18:45:00";
+                document.getElementById('customMessage').placeholder = "Additional message (Optional, Max 100 chars)";
+            } else {
+                targetTimeInput.placeholder = "例 18:45:00";
+                document.getElementById('customMessage').placeholder = "追加メッセージ（任意・最大100文字）";
+            }
+        }
+
+        function t(key) {
+            return translations[currentLang][key] || key;
         }
 
         function addLeaderRow() {
@@ -349,7 +470,10 @@
         function formatTime(date) {
             const m = date.getMinutes().toString().padStart(2, '0');
             const s = date.getSeconds().toString().padStart(2, '0');
-            // 要望通りの「mm分ss秒」形式
+            // i18n対応
+            if (currentLang === 'en') {
+                return `${m}m${s}s`;
+            }
             return `${m}分${s}秒`;
         }
 
@@ -383,17 +507,24 @@
             }
 
             const rallySec = selectedRallyMin * 60;
-            let output = `${selectedRallyMin}分集結\n`;
+            // i18n対応ヘッダー
+            let output = (currentLang === 'en')
+                ? `${selectedRallyMin}m Rally\n`
+                : `${selectedRallyMin}分集結\n`;
 
             active.forEach(l => {
                 const dist = parseInt(l.sec);
                 const startTimestamp = targetDate.getTime() - (dist * 1000) - (rallySec * 1000);
                 const startDate = new Date(startTimestamp);
 
-                output += `${formatName(l.name)}（${l.sec}秒）　${formatTime(startDate)}\n`;
+                // 秒の単位もi18n
+                const secUnit = (currentLang === 'en') ? 's' : '秒';
+                output += `${formatName(l.name)}（${l.sec}${secUnit}）　${formatTime(startDate)}\n`;
             });
 
-            output += `\n着弾時間 ${formatLandingTime(targetDate)}`;
+            // i18n対応着弾時間
+            const landingLabel = (currentLang === 'en') ? "Landing Time" : "着弾時間";
+            output += `\n${landingLabel} ${formatLandingTime(targetDate)}`;
 
             // カスタムメッセージ追加
             const customMsg = document.getElementById('customMessage').value;
@@ -439,17 +570,21 @@
             const rallySec = selectedRallyMin * 60;
             const landingTime = new Date(baseStartTime.getTime() + (rallySec * 1000) + (minDist * 1000));
 
-            let output = `${selectedRallyMin}分集結\n`;
+            let output = (currentLang === 'en')
+                ? `${selectedRallyMin}m Rally\n`
+                : `${selectedRallyMin}分集結\n`;
 
             active.forEach(l => {
                 const dist = parseInt(l.sec);
                 const diff = dist - minDist;
                 const myStart = new Date(baseStartTime.getTime() - (diff * 1000));
 
-                output += `${formatName(l.name)}（${l.sec}秒）　${formatTime(myStart)}\n`;
+                const secUnit = (currentLang === 'en') ? 's' : '秒';
+                output += `${formatName(l.name)}（${l.sec}${secUnit}）　${formatTime(myStart)}\n`;
             });
 
-            output += `\n着弾時間 ${formatLandingTime(landingTime)}`;
+            const landingLabel = (currentLang === 'en') ? "Landing Time" : "着弾時間";
+            output += `\n${landingLabel} ${formatLandingTime(landingTime)}`;
 
             // カスタムメッセージ追加
             const customMsg = document.getElementById('customMessage').value;
