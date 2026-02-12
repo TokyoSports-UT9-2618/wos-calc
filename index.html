@@ -539,16 +539,56 @@
         }
 
         function parseTimeInput(str) {
-            const parts = str.split(/[:：]/).map(Number);
-            if (parts.length < 2 || parts.some(isNaN)) return null;
+            // 全角数字を半角に変換
+            str = str.replace(/[０-９]/g, function (s) {
+                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+            });
+
+            // 数字以外の文字（コロン、全角コロン、スペース、ドット等）を区切り文字として扱い、数字の配列を取得
+            // 空文字はフィルタリング
+            const parts = str.split(/[^0-9]+/).filter(s => s !== "").map(Number);
+
+            if (parts.length === 0) return null;
 
             const now = new Date();
             const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-            if (parts.length === 3) {
+            if (parts.length >= 3) {
+                // HH:mm:ss (3つ以上ある場合は先頭3つを採用)
                 d.setHours(parts[0], parts[1], parts[2]);
             } else if (parts.length === 2) {
-                d.setHours(parts[0], parts[1], 0);
+                // mm:ss (HHは00とみなす)
+                d.setHours(0, parts[0], parts[1]);
+            } else if (parts.length === 1) {
+                // 数字のみの場合の解釈（例: 184500 -> 18:45:00, 4500 -> 00:45:00）
+                // 桁数で判断を試みる
+                const numStr = parts[0].toString();
+                if (numStr.length === 6) {
+                    // 184500 -> 18:45:00
+                    const h = parseInt(numStr.substring(0, 2));
+                    const m = parseInt(numStr.substring(2, 4));
+                    const s = parseInt(numStr.substring(4, 6));
+                    d.setHours(h, m, s);
+                } else if (numStr.length === 4) {
+                    // 4500 -> 00:45:00
+                    const m = parseInt(numStr.substring(0, 2));
+                    const s = parseInt(numStr.substring(2, 4));
+                    d.setHours(0, m, s);
+                } else {
+                    // それ以外は秒として扱うか、エラーとするかだが、
+                    // ここでは簡単な入力 (例: 30) は分や秒として扱いたいところだが、
+                    // mm:ss のニーズが強いので、入力が1つの場合は意図が不明瞭。
+                    // しかし「緩和」の指示に従い、mm:00 (分のみ) または 00:00:ss (秒のみ) など推測が必要。
+                    // ここでは一旦、パース不能としてnullを返さずに、エラー判定を呼び出し元に委ねる形にしたいが、
+                    // 既存ロジックに合わせて Date オブジェクトを返す必要がある。
+                    // 暫定: 1つだけなら "分" とみなして 00:mm:00 とする（集結時間の文脈的に）
+                    // いや、mm:ssの省略形としての4500はサポートしたが、単一数字は曖昧。
+                    // ユーザー指示「可能な限り数字を読み取って時間として解釈」に従い、
+                    // 4桁・6桁以外はアラート対象とする（nullを返す）
+                    return null;
+                }
+            } else {
+                return null;
             }
             return d;
         }
