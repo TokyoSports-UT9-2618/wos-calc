@@ -150,6 +150,19 @@
             opacity: 1;
             bottom: 50px;
         }
+        
+        /* カスタムメッセージ入力 */
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: inherit;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -187,6 +200,11 @@
             <button class="delay-btn" onclick="calcFromDelay(60)">60秒後</button>
             <button class="delay-btn" onclick="calcFromDelay(90)">90秒後</button>
         </div>
+    </div>
+    
+    <div class="card">
+        <div style="font-weight:bold; margin-bottom:5px;">カスタムメッセージ（任意）</div>
+        <textarea id="customMessage" placeholder="追加メッセージ（任意・最大100文字）" maxlength="100" rows="3"></textarea>
     </div>
 
     <div class="card">
@@ -328,7 +346,17 @@
             output += `${formatName(l.name)}（${l.sec}秒）　${formatTime(startDate)}\n`;
         });
 
-        output += `\n着弾時間 ${formatLandingTime(targetDate)}\n着弾時間に合わせて派兵してください`;
+        output += `\n着弾時間 ${formatLandingTime(targetDate)}`;
+
+        // カスタムメッセージ追加
+        const customMsg = document.getElementById('customMessage').value;
+        if (customMsg) {
+            output += `\n\n${customMsg}`;
+        }
+
+        // 固定フッター追加
+        output += `\n\n※UT9@2618: The ultimate alliance for your WOS life!`;
+        
         showResult(output);
     }
 
@@ -374,7 +402,17 @@
             output += `${formatName(l.name)}（${l.sec}秒）　${formatTime(myStart)}\n`;
         });
 
-        output += `\n着弾時間 ${formatLandingTime(landingTime)}\n着弾時間に合わせて派兵してください`;
+        output += `\n着弾時間 ${formatLandingTime(landingTime)}`;
+
+        // カスタムメッセージ追加
+        const customMsg = document.getElementById('customMessage').value;
+        if (customMsg) {
+            output += `\n\n${customMsg}`;
+        }
+
+        // 固定フッター追加
+        output += `\n\n※UT9@2618: The ultimate alliance for your WOS life!`;
+        
         showResult(output);
     }
 
