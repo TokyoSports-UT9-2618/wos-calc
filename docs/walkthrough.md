@@ -18,22 +18,19 @@
     *   区切り文字 (例: `12 15 30`, `12：15：30` などスペースや全角コロンも可)
 *   **アラート抑制**: 解析可能な数値が含まれていれば、エラーを出さずに計算を実行します。
 
+### 4. リファクタリング (内部改善)
+*   **コードの整理**:
+    *   重複していた計算結果の出力生成ロジックを統合しました。
+    *   定数（フッターメッセージや制限文字数など）をまとめて管理しやすくしました。
+*   機能的な変更はありませんが、今後のメンテナンス性が向上しました。
+
 ## 動作確認結果
+
+### リファクタリング後の動作確認
+![verify_refactoring](/Users/takahironochiseabirdinc./.gemini/antigravity/brain/60738c73-d700-4238-b66e-638d31bb68ea/verify_refactoring_1771032146442.webp)
+
+*   以前と同様に計算、メッセージ追加、コピー機能が正常に動作することを確認しました。
+*   既存の仕様（リーダー名の3文字制限など）も維持されています。
 
 ### タイトル修正確認 (英語モード)
 ![verify_title_correction](/Users/takahironochiseabirdinc./.gemini/antigravity/brain/60738c73-d700-4238-b66e-638d31bb68ea/.system_generated/click_feedback/click_feedback_1771031810975.png)
-
-### 時間入力テスト
-
-以下のパターンで計算が正しく行われることを確認しました。
-
-| 入力値 | 解釈結果 | 判定 |
-| :--- | :--- | :--- |
-| `12:00:00` | 12:00:00 | OK |
-| `45:00` | 00:45:00 | OK |
-| `12 15 30` | 12:15:30 | OK |
-| `184500` | 18:45:00 | OK |
-| `1530` | 00:15:30 | OK |
-
-**テスト実行ログ**
-![verify_time_input_formats](/Users/takahironochiseabirdinc./.gemini/antigravity/brain/60738c73-d700-4238-b66e-638d31bb68ea/verify_time_input_formats_1770911468711.webp)

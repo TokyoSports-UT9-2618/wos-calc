@@ -77,4 +77,29 @@
     *   `18：45：00` (全角コロン) -> 成功
     *   `18 45 00` (スペース区切り) -> 成功 (実装次第)
 2.  **計算結果確認**:
-    *   意図した時間で計算されているか結果を確認。
+
+## Refactoring Plan
+### Goal
+Simplify `index.html` by removing code duplication and improving maintainability.
+
+### Proposed Changes
+1.  **Extract Output Generation Logic**:
+    *   Create a new function `generateOutputText(activeLeaders, rallyMin, landingTime)` that returns the formatted result string.
+    *   This function will handle:
+        *   Rally time header (i18n)
+        *   Leader list formatting (i18n)
+        *   Landing time footer (i18n)
+        *   Custom message appending
+        *   Fixed footer appending
+    *   `calcFromTarget` and `calcFromDelay` will call this function.
+
+2.  **Consolidate Constants**:
+    *   Define `const FIXED_FOOTER = "※UT9@2618: The ultimate alliance for your WOS life!";`
+    *   Define `const MAX_LEADER_NAME_LEN = 3;`
+
+3.  **Code Cleanup**:
+    *   Ensure `saveLeaders` is used consistently.
+    *   Group related functions (Data Management, UI, Calculation, Utilities).
+
+### Verification
+*   Regression testing using the browser to ensure `calcFromTarget` and `calcFromDelay` still produce the exact same output format as before.
