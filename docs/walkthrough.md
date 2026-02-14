@@ -8,8 +8,9 @@
 
 ### 2. 英語対応 (i18n)
 *   日/英の言語切り替え機能を追加しました。
+*   【バグ修正】英語タイトルを "Larry Time Calculator" から "Rally Time Calculator" に修正しました。
 
-### 3. 【新規】時間入力の柔軟化
+### 3. 時間入力の柔軟化
 *   **バリデーション緩和**: `HH:mm:ss` 形式以外の入力も柔軟に受け付けるようにしました。
 *   **サポート形式**:
     *   `mm:ss` (例: `45:00` -> 00:45:00 として計算)
@@ -18,6 +19,9 @@
 *   **アラート抑制**: 解析可能な数値が含まれていれば、エラーを出さずに計算を実行します。
 
 ## 動作確認結果
+
+### タイトル修正確認 (英語モード)
+![verify_title_correction](/Users/takahironochiseabirdinc./.gemini/antigravity/brain/60738c73-d700-4238-b66e-638d31bb68ea/.system_generated/click_feedback/click_feedback_1771031810975.png)
 
 ### 時間入力テスト
 
