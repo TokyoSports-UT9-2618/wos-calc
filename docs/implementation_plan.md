@@ -103,3 +103,30 @@ Simplify `index.html` by removing code duplication and improving maintainability
 
 ### Verification
 *   Regression testing using the browser to ensure `calcFromTarget` and `calcFromDelay` still produce the exact same output format as before.
+
+## Feature: Leader Management (Delete & Sort)
+### Goal
+Allow users to delete individual leader rows and reorder them via drag-and-drop, while maintaining a minimum of 5 rows.
+
+### Proposed Changes
+#### [MODIFY] [index.html](file:///Users/takahironochiseabirdinc./Downloads/アングラ1/wos-calc/index.html)
+1.  **Delete Feature**:
+    *   Add a "Delete" button (icon) to each leader row.
+    *   Implement `deleteLeader(index)` function.
+    *   Logic: Remove the item at `index`. If the remaining count is less than 5, append empty rows to maintain 5 rows.
+    *   UI: Place the delete button clearly (e.g., red garbage bin or 'x').
+
+2.  **Sort Feature**:
+    *   Include `SortableJS` via CDN (reliable and touch-friendly).
+    *   Add a "Handle" icon (3 lines hamburger) to the left of the leader name.
+    *   Initialize `Sortable` on `#leaders-container`.
+    *   Logic: On sort end (`onEnd` event), update the `leaders` array to match the new DOM order and save to LocalStorage.
+
+### Verification
+*   **Delete**:
+    *   Add 6th leader, delete it -> Row disappears.
+    *   Have 5 leaders, delete one -> Row content clears (or row removes and new one appends at bottom), total stays 5.
+*   **Sort**:
+    *   Drag row 1 to row 3. Verify order updates in UI and `leaders` array.
+    *   Reload page -> Order persists.
+    *   Output text reflects the new order.

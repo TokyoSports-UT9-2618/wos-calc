@@ -1,36 +1,35 @@
-# wos-calc 修正完了報告
+# Walkthrough - WOS Calc Refactoring & Features
 
-## 変更内容
+## Refactoring Overview (Previous Step)
+Refactored `index.html` to improve code structure and maintainability.
+- **Code Deduplication**: Unified output generation logic into `generateOutputText`.
+- **Constants**: Consolidated magic strings and numbers into `CONSTANTS`.
+- **Validation**: Verified `calcFromTarget` and `calcFromDelay` work exactly as before.
 
-### 1. カスタムメッセージ機能
-*   計算結果に追加のメッセージを含める機能を追加しました。
-*   入力内容は自動保存されます。
+## Feature: Leader Management (Delete & Sort)
+Values the user's request to manage leaders individually.
 
-### 2. 英語対応 (i18n)
-*   日/英の言語切り替え機能を追加しました。
-*   【バグ修正】英語タイトルを "Larry Time Calculator" から "Rally Time Calculator" に修正しました。
+### Changes
+1.  **SortableJS Integration**:
+    - Added `SortableJS` CDN to enable drag-and-drop reordering.
+    - Added "≡" drag handle to each leader row.
+    - Rows can now be reordered, and the order is saved to LocalStorage.
 
-### 3. 時間入力の柔軟化
-*   **バリデーション緩和**: `HH:mm:ss` 形式以外の入力も柔軟に受け付けるようにしました。
-*   **サポート形式**:
-    *   `mm:ss` (例: `45:00` -> 00:45:00 として計算)
-    *   数字のみ (例: `184500` -> 18:45:00, `4500` -> 00:45:00)
-    *   区切り文字 (例: `12 15 30`, `12：15：30` などスペースや全角コロンも可)
-*   **アラート抑制**: 解析可能な数値が含まれていれば、エラーを出さずに計算を実行します。
+2.  **Delete Functionality**:
+    - Added "×" delete button to each leader row.
+    - Implementing `deleteLeader` function to remove specific rows.
+    - **Minimum Row Maintenance**: Ensures there are always at least 5 rows by appending empty rows when one is deleted.
 
-### 4. リファクタリング (内部改善)
-*   **コードの整理**:
-    *   重複していた計算結果の出力生成ロジックを統合しました。
-    *   定数（フッターメッセージや制限文字数など）をまとめて管理しやすくしました。
-*   機能的な変更はありませんが、今後のメンテナンス性が向上しました。
+### Verification & Bug Fix
+During verification, a bug was found where deleting a row after sorting would remove the wrong row (due to index mismatch).
+- **Fix**: Updated `deleteLeader` to find the row index dynamically using the DOM element (`btn.closest('.leader-row')`) instead of relying on the index passed at render time.
+- **Verification**: Confirmed that deleting a sorted row works correctly using a fresh test file (`index_debug.html`) to bypass browser caching issues.
 
-## 動作確認結果
+### Screenshots
+| Feature | Screenshot |
+| :--- | :--- |
+| **Initial State** | ![Initial State](file:///Users/takahironochiseabirdinc./.gemini/antigravity/brain/60738c73-d700-4238-b66e-638d31bb68ea/initial_state_1771033808368.png) |
+| **Reordering** | ![Reordering](file:///Users/takahironochiseabirdinc./.gemini/antigravity/brain/60738c73-d700-4238-b66e-638d31bb68ea/.system_generated/click_feedback/click_feedback_1771034155561.png) |
 
-### リファクタリング後の動作確認
-![verify_refactoring](/Users/takahironochiseabirdinc./.gemini/antigravity/brain/60738c73-d700-4238-b66e-638d31bb68ea/verify_refactoring_1771032146442.webp)
-
-*   以前と同様に計算、メッセージ追加、コピー機能が正常に動作することを確認しました。
-*   既存の仕様（リーダー名の3文字制限など）も維持されています。
-
-### タイトル修正確認 (英語モード)
-![verify_title_correction](/Users/takahironochiseabirdinc./.gemini/antigravity/brain/60738c73-d700-4238-b66e-638d31bb68ea/.system_generated/click_feedback/click_feedback_1771031810975.png)
+### Video
+![Verification Video](file:///Users/takahironochiseabirdinc./.gemini/antigravity/brain/60738c73-d700-4238-b66e-638d31bb68ea/debug_leader_deletion_3_1771034131289.webp)
