@@ -247,6 +247,7 @@
             <div style="margin-bottom:10px; font-weight:bold; font-size:14px; color:#555;" data-i18n="rallyTime">集結時間
             </div>
             <div class="rally-options">
+                <button class="rally-btn" onclick="selectRally(0, this)" data-i18n="rallySolo">単騎</button>
                 <button class="rally-btn active" onclick="selectRally(1, this)" data-i18n="rally1m">1分集結</button>
                 <button class="rally-btn" onclick="selectRally(5, this)" data-i18n="rally5m">5分集結</button>
                 <button class="rally-btn" onclick="selectRally(10, this)" data-i18n="rally10m">10分集結</button>
@@ -330,6 +331,7 @@
                     title: "集結時間計算機",
                     addReader: "＋ リーダー追加",
                     rallyTime: "集結時間",
+                    rallySolo: "単騎",
                     rally1m: "1分集結",
                     rally5m: "5分集結",
                     rally10m: "10分集結",
@@ -351,6 +353,7 @@
                     title: "Rally Time Calculator",
                     addReader: "+ Add Leader",
                     rallyTime: "Rally Time",
+                    rallySolo: "Solo",
                     rally1m: "1m Rally",
                     rally5m: "5m Rally",
                     rally10m: "10m Rally",
@@ -603,7 +606,12 @@
             // --- 出力生成ロジック (共通化) ---
             function generateOutputText(activeLeaders, rallyMin, landingTime, resultItems) {
                 // ヘッダー
-                let output = (currentLang === 'en') ? `${rallyMin}m Rally\n` : `${rallyMin}分集結\n`;
+                let output;
+                if (rallyMin === 0) {
+                    output = (currentLang === 'en') ? "Solo\n" : "単騎\n";
+                } else {
+                    output = (currentLang === 'en') ? `${rallyMin}m Rally\n` : `${rallyMin}分集結\n`;
+                }
 
                 // 各リーダーの時間
                 const secUnit = (currentLang === 'en') ? 's' : '秒';
